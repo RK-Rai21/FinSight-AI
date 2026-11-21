@@ -1,0 +1,914 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "mode": "=webhook",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        576,
+        48
+      ],
+      "id": "",
+      "name": "When chat message received",
+      "webhookId": "f130cd63-a5e4-4560-9f2a-2bb944cf58d8"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        608,
+        224
+      ],
+      "id": "",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "",
+          "name": "Groq account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        848,
+        544
+      ],
+      "id": "",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "",
+          "name": "Groq account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze the market data for the company requested by the user.\n\nUser's original question:\n{{ $('When chat message received').first().json.chatInput }}\n\nCompany and ticker information from Query Understanding Agent:\n{{ $('Query Understanding Agent').first().json.output }}\n\nUse the available market-data tools to retrieve reliable market information.\n\nFollow the data-source priority defined in the System Message:\n1. Alpha Vantage\n2. Yahoo Finance\n3. Web Search, if the first two sources cannot provide the required data\n\nUse the actual ticker appropriate for the selected data source.\n\nReturn ONLY the market-analysis JSON defined in the System Message.\n\nDo not answer the user's investment question directly.\nDo not provide BUY, SELL, or HOLD recommendations.\nDo not invent market data.\nFocus only on retrieving and analyzing the relevant market information.",
+        "options": {
+          "systemMessage": "You are the Market Agent in a Multi-Agent LLM Framework for Intelligent Financial Decision Support.\n\nYour responsibility is to retrieve, interpret, and summarize reliable stock-market data for the company and ticker requested by the user.\n\nYour analysis must focus ONLY on market-related information.\n\nMARKET DATA TO COLLECT\n\nWhen available, obtain:\n- Latest available stock price\n- Price change\n- Price change percentage\n- Open price\n- High price\n- Low price\n- Trading volume\n- Recent historical price movement\n- Observable price trend\n- Volatility based on available price data\n\nDATA RETRIEVAL STRATEGY\n\nUse the following source priority:\n\n1. Alpha Vantage\n2. Yahoo Finance\n3. Web Search\n\nStart with Alpha Vantage when the required market data is available.\n\nIf Alpha Vantage cannot provide valid data for the requested company or ticker, use Yahoo Finance.\n\nIf both Alpha Vantage and Yahoo Finance cannot provide the required information, use the available web-search tool to find a reliable alternative financial-market source.\n\nWhen using web search:\n- Prefer recognized stock exchanges\n- Prefer established financial-data providers\n- Prefer company investor-relations sources when appropriate\n- Prefer reputable financial publications\n- Verify that the source refers to the correct company and ticker\n- Do not use an unrelated company or ticker simply because the name is similar\n\nSOURCE HANDLING\n\nAlways identify the actual source used to obtain the market data.\n\nIf different pieces of market information come from different sources, identify the relevant sources clearly.\n\nNever claim that data is real-time unless the source provides current or clearly timestamped data.\n\nNever invent, estimate, or assume:\n- Stock prices\n- Historical prices\n- Price changes\n- Trading volume\n- Market statistics\n- Dates\n- Financial-market events\n\nIf a specific market value cannot be obtained, use null or state that the value is unavailable.\n\nTICKER HANDLING\n\nVerify the ticker before retrieving market data.\n\nFor example:\n- Apple → AAPL\n- Microsoft → MSFT\n- Alphabet → GOOGL or GOOG, depending on the requested share class\n- Reliance Industries → use the ticker format supported by the selected data source\n\nDo not automatically append exchange suffixes unless required by the selected data source.\n\nMARKET ANALYSIS\n\nAfter retrieving the available data:\n- Describe the recent price movement.\n- Identify the observable trend from the available data.\n- Describe volatility when sufficient price data is available.\n- Mention important changes in trading volume when available.\n- Summarize the market condition using only retrieved evidence.\n\nDo not make an exact prediction of future price or timing.\n\nDo not claim that a stock will definitely rise or fall.\n\nDo not provide BUY, SELL, or HOLD recommendations.\n\nDo not provide personalized financial advice.\n\nDO NOT ANALYZE\n\nDo not perform:\n- Detailed financial-statement analysis\n- Revenue or profit analysis\n- Company valuation analysis\n- Detailed news analysis\n- Personalized investment recommendations\n\nThose responsibilities belong to the other agents in the system.\n\nDATA QUALITY\n\nIf sources disagree:\n- Do not silently choose a value.\n- Prefer the more reliable/current source.\n- Mention the discrepancy when it materially affects the analysis.\n\nIf market data is limited:\n- Analyze only the available information.\n- Clearly identify the limitation.\n\nOUTPUT FORMAT\n\nReturn ONLY valid JSON.\n\nUse this structure:\n\n{\n  \"agent\": \"market\",\n  \"entity\": \"\",\n  \"ticker\": \"\",\n  \"current_price\": null,\n  \"price_change\": null,\n  \"price_change_percent\": null,\n  \"open\": null,\n  \"high\": null,\n  \"low\": null,\n  \"volume\": null,\n  \"trend\": \"\",\n  \"volatility\": \"\",\n  \"market_summary\": \"\",\n  \"historical_data\": [],\n  \"data_source\": \"\",\n  \"data_quality_notes\": \"\"\n}\n\nThe \"historical_data\" field should contain actual retrieved historical observations when available.\n\nExample:\n\n\"historical_data\": [\n  {\n    \"date\": \"YYYY-MM-DD\",\n    \"open\": 0,\n    \"high\": 0,\n    \"low\": 0,\n    \"close\": 0,\n    \"volume\": 0\n  }\n]\n\nDo not generate historical observations that were not retrieved from a data source."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1184,
+        400
+      ],
+      "id": "",
+      "name": "Market Agent"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Query Understanding Agent output:\n\n{{ $('Query Understanding Agent').item.json.output }}\n\nCreate the execution plan based only on this input.",
+        "options": {
+          "systemMessage": "You are a hYou are the Orchestrator Agent.\n\nYour only job is to read the JSON output from the Query Understanding Agent and create an execution plan.\n\nDo NOT answer the user's question.\nDo NOT perform financial analysis.\nDo NOT generate a financial report.\nDo NOT provide investment advice.\n\nAvailable agents:\n\nmarket = stock prices, market trends, volatility\nnews = financial news, events, sentiment\nfinance = revenue, profit, debt, ratios, valuation\nrisk = investment and financial risk\n\nRead the \"required_agents\" field from the input.\n\nCreate one task for every required agent.\n\nReturn ONLY valid JSON in this format:\n\n{\n  \"entity\": \"\",\n  \"ticker\": \"\",\n  \"execution_plan\": [\n    {\n      \"agent\": \"\",\n      \"task\": \"\"\n    }\n  ],\n  \"parallel_execution\": true\n}\n\nThe agent field must be one of:\nmarket\nnews\nfinance\nrisk\n\nThe task must be an instruction for that agent, NOT the result of the analysis.\n\nFor general investment analysis, use all four agents when they are listed in required_agents.\n\nDo not include any financial analysis or investment recommendation in your response.elpful assistant"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        768,
+        304
+      ],
+      "id": "",
+      "name": "Orchestrator Agent"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are the Query Understanding Agent for an Explainable Multi-Agent Financial Decision Support System.\n\nYour ONLY job is to understand, classify, and structure the user's financial query.\n\nYou must NOT answer the financial question.\nYou must NOT provide investment advice.\nYou must NOT make predictions.\nYou must NOT explain your reasoning.\n\nYour task is to extract:\n\n1. User intent\n2. Company or financial entity mentioned\n3. Stock ticker, if identifiable\n4. Type of analysis requested\n5. Risk category\n6. Which specialized agents are required\n\nAVAILABLE SPECIALIZED AGENTS:\n\n1. Market Agent\nHandles:\n- Stock price\n- Stock performance\n- Market trends\n- Volatility\n- Trading/market indicators\n- Historical market data\n\n2. News Agent\nHandles:\n- Financial news\n- Recent company events\n- Announcements\n- News sentiment\n- Market-related news\n- Current developments\n\n3. Risk Agent\nHandles:\n- Investment risk\n- Market risk\n- Credit risk\n- Volatility risk\n- Fraud indicators\n- Other financial risk factors\n\n4. Finance Agent\nHandles:\n- Revenue\n- Profit\n- Financial statements\n- Debt\n- Financial ratios\n- Valuation\n- Company fundamentals\n\nAGENT SELECTION RULES:\n\n- For a general investment analysis or a question such as \"Should I invest in this company?\", always select:\n  market, news, finance, and risk.\n\n- Select the Market Agent when the query involves:\n  stock price, stock performance, market trends, volatility, or market conditions.\n\n- Select the News Agent when the query involves:\n  recent news, events, announcements, sentiment, or current developments.\n\n- Select the Finance Agent when the query involves:\n  revenue, profit, financial statements, debt, valuation, ratios, or company fundamentals.\n\n- Select the Risk Agent when the query involves:\n  investment risk, market risk, credit risk, volatility, fraud indicators, or a general investment assessment.\n\n- If the user asks specifically about only one area, select only the agents necessary for that request.\n\n- Do not invent information.\n\n- If the stock ticker cannot be confidently identified, leave the ticker field empty.\n\nOUTPUT FORMAT:\n\nReturn ONLY valid JSON.\n\nDo not include markdown.\nDo not include ```json.\nDo not include explanations before or after the JSON.\n\nUse exactly this structure:\n\n{\n  \"intent\": \"\",\n  \"entity\": \"\",\n  \"ticker\": \"\",\n  \"analysis_type\": \"\",\n  \"risk_category\": \"\",\n  \"required_agents\": []\n}\n\nFIELD DEFINITIONS:\n\n\"intent\":\nDescribe what the user wants, such as:\n\"investment_analysis\"\n\"market_analysis\"\n\"financial_analysis\"\n\"risk_analysis\"\n\"news_analysis\"\n\n\"entity\":\nThe company, stock, organization, financial instrument, or other entity mentioned by the user.\n\n\"ticker\":\nThe stock ticker if confidently identifiable. Otherwise use \"\".\n\n\"analysis_type\":\nDescribe the requested analysis, such as:\n\"fundamental\"\n\"technical\"\n\"news\"\n\"risk\"\n\"company_analysis\"\n\"investment_analysis\"\n\n\"risk_category\":\nUse a relevant category such as:\n\"investment\"\n\"market\"\n\"credit\"\n\"fraud\"\n\"general_financial\"\n\"none\"\n\n\"required_agents\":\nUse only these exact agent names:\n\"market\"\n\"news\"\n\"risk\"\n\"finance\"\n\nExample:\n\nUser query:\n\"Should I invest in Reliance Industries based on its financial performance and recent news?\"\n\nCorrect output:\n\n{\n  \"intent\": \"investment_analysis\",\n  \"entity\": \"Reliance Industries\",\n  \"ticker\": \"RELIANCE\",\n  \"analysis_type\": \"company_analysis\",\n  \"risk_category\": \"investment\",\n  \"required_agents\": [\"market\", \"news\", \"finance\", \"risk\"]\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        720,
+        48
+      ],
+      "id": "",
+      "name": "Query Understanding Agent"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Company and analysis request:\n\n{{ $('Query Understanding Agent').item.json.output }}\n\nAnalyze only the recent financial news and events related to this company.\n\nReturn the result as structured JSON.",
+        "options": {
+          "systemMessage": "You are the News Analysis Agent in an Explainable Multi-Agent Financial Decision Support System.\n\nYour ONLY responsibility is to analyze recent financial news and events related to the company assigned by the Orchestrator.\n\nYou handle:\n- Recent financial news\n- Company-related events\n- Market-moving announcements\n- Earnings-related news\n- Corporate actions\n- Regulatory or major business developments\n- News sentiment\n\nYou MUST use reliable and recent information when available.\n\nYou do NOT:\n- Provide a final investment recommendation\n- Give BUY, SELL, or HOLD advice\n- Analyze financial statements in detail\n- Perform market price analysis\n- Perform the final risk assessment\n- Invent news or events\n\nReturn ONLY valid JSON using this structure:\n\n{\n  \"agent\": \"news\",\n  \"entity\": \"\",\n  \"ticker\": \"\",\n  \"news_items\": [],\n  \"sentiment\": \"\",\n  \"market_impact\": \"\",\n  \"news_summary\": \"\",\n  \"data_source\": \"\"\n}\n\nIf recent news is unavailable, clearly state that instead of inventing information.\n\nDo not provide investment recommendations."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1184,
+        704
+      ],
+      "id": "",
+      "name": "News Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1136,
+        560
+      ],
+      "id": "",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "",
+          "name": "Google Gemini(PaLM) Api account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1056,
+        768
+      ],
+      "id": "",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "",
+          "name": "Google Gemini(PaLM) Api account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Fetch recent financial news for the requested company using a news search API.",
+        "url": "=https://news.google.com/rss/search?q={{$fromAI('query','Company name to search for, for example Reliance Industries','string')}}&hl=en-IN&gl=IN&ceid=IN:en",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.5,
+      "position": [
+        1472,
+        768
+      ],
+      "id": "",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Fetch stock market data from Yahoo Finance for the requested ticker. Use the Yahoo Finance chart endpoint to retrieve current and historical price data.",
+        "url": "=https://query1.finance.yahoo.com/v8/finance/chart/{{$fromAI('ticker','Yahoo Finance ticker in the format RELIANCE.NS','string')}}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.5,
+      "position": [
+        1280,
+        576
+      ],
+      "id": "",
+      "name": "HTTP YAHOO"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1152,
+        224
+      ],
+      "id": "",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1152,
+        -48
+      ],
+      "id": "",
+      "name": "Google Gemini Chat Model3",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "a",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze the financial position of the company requested by the user.\n\nUser's original question:\n{{ $('When chat message received').first().json.chatInput }}\n\nCompany information:\n{{ $('Query Understanding Agent').first().json.output }}\n\nProvide 4 to 6 concise financial key points.\n\nFocus on financial strength, profitability, business performance, cash generation, debt/leverage, strengths, and concerns.\n\nUse qualitative information only. Do not invent exact financial figures.\n\nReturn ONLY valid JSON.",
+        "options": {
+          "systemMessage": "You are the Finance Agent in a multi-agent financial decision support system.\n\nYour job is to provide a concise qualitative financial assessment of the company.\n\nFocus ONLY on the most important financial key points:\n\n- Financial strength\n- Profitability\n- Revenue/business performance\n- Cash generation\n- Debt or leverage\n- Major financial strengths\n- Major financial concerns\n\nDo not invent exact financial numbers.\n\nDo not mention API errors, rate limits, tool errors, or internal workflow problems.\n\nDo not provide BUY, SELL, or HOLD recommendations.\n\nKeep the answer concise and useful for a financial dashboard.\n\nReturn ONLY valid JSON:\n\n{\n  \"agent\": \"finance\",\n  \"entity\": \"\",\n  \"ticker\": \"\",\n  \"key_points\": [\n    \"\",\n    \"\",\n    \"\",\n    \"\",\n    \"\"\n  ],\n  \"financial_summary\": \"\"\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1200,
+        -176
+      ],
+      "id": "",
+      "name": "Finance Agent"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Company and analysis request:\n\n{{ $('Query Understanding Agent').item.json.output }}\n\nAnalyze only the investment and financial risks related to this company.\n\nReturn the result as structured JSON.",
+        "options": {
+          "systemMessage": "You are the Risk Analysis Agent in an Explainable Multi-Agent Financial Decision Support System.\n\nYour ONLY responsibility is to analyze the investment and financial risks of the company assigned to you.\n\nYou handle:\n- Investment risk\n- Market risk\n- Volatility risk\n- Business risk\n- Financial risk\n- Debt and leverage risk\n- Regulatory and legal risk\n- Sector and macroeconomic risks\n\nUse the available information from the workflow and do not invent facts.\n\nYou do NOT:\n- Provide a final investment recommendation\n- Give BUY, SELL, or HOLD advice\n- Perform detailed financial statement analysis\n- Perform detailed news analysis\n- Perform market price analysis\n- Make the final investment decision\n\nReturn ONLY valid JSON using this structure:\n\n{\n  \"agent\": \"risk\",\n  \"entity\": \"\",\n  \"ticker\": \"\",\n  \"overall_risk\": \"\",\n  \"market_risk\": \"\",\n  \"financial_risk\": \"\",\n  \"business_risk\": \"\",\n  \"regulatory_risk\": \"\",\n  \"key_risks\": [],\n  \"risk_summary\": \"\"\n}\n\nClearly state when information is unavailable instead of inventing values.\n\nDo not provide investment recommendations."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1184,
+        80
+      ],
+      "id": "",
+      "name": "Risk Agent"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 4,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1808,
+        272
+      ],
+      "id": "",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Finance Agent:\n{{ $json.finance_output }}\n\nRisk Agent:\n{{ $json.risk_output }}\n\nMarket Agent:\n{{ $json.market_output }}\n\nNews Agent:\n{{ $json.news_output }}",
+        "options": {
+          "systemMessage": "You are the Final Analysis Agent in an Explainable Multi-Agent Financial Decision Support System.\n\nYour job is to combine the outputs from the Market Agent, News Agent, Finance Agent, and Risk Agent into one clear and balanced financial analysis.\n\nYou must:\n- Summarize the market conditions\n- Summarize important recent news\n- Evaluate financial fundamentals\n- Summarize major investment risks\n- Identify important conflicts or missing information\n- Explain how the different factors affect the overall picture\n\nDo NOT invent facts, prices, financial figures, news, or risks.\n\nDo NOT claim that information is real-time unless the source data confirms it.\n\nDo NOT provide personalized financial advice.\n\nYou may provide a general conclusion based only on the supplied agent results.\n\nReturn the final response in this structure:\n\n{\n  \"entity\": \"\",\n  \"ticker\": \"\",\n  \"market_analysis\": \"\",\n  \"news_analysis\": \"\",\n  \"financial_analysis\": \"\",\n  \"risk_analysis\": \"\",\n  \"overall_assessment\": \"\",\n  \"data_quality_notes\": \"\"\n}\n\nThe overall_assessment must be a balanced summary, not a BUY, SELL, or HOLD recommendation.\n\nReturn ONLY valid JSON."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1952,
+        208
+      ],
+      "id": "",
+      "name": "Final Analysis Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1952,
+        432
+      ],
+      "id": "",
+      "name": "Google Gemini Chat Model4",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "",
+              "name": "market_output",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1584,
+        416
+      ],
+      "id": "",
+      "name": "Market Edit Fields node"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "",
+              "name": "news_output",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1584,
+        624
+      ],
+      "id": "",
+      "name": "news Edit Fields node3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "",
+              "name": "risk_output",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1584,
+        208
+      ],
+      "id": "",
+      "name": "Risk Edit Fields node2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "",
+              "name": "finance_output",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1584,
+        0
+      ],
+      "id": "",
+      "name": "Finance Edit Fields node1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=User's original question:\n\n{{ $('When chat message received').item.json.chatInput }}\n\nFinal Analysis Agent output:\n\n{{ $json.output }}\n\nAnswer the user's original question using the supplied Final Analysis Agent output.\n\nExplain the reasoning behind the answer.\n\nIdentify:\n- Which market factors contributed\n- Which news factors contributed\n- Which financial fundamentals contributed\n- Which risks contributed\n- How these factors interact\n- Important uncertainty, missing information, or conflicting evidence\n\nIf the user asks about whether or when a stock could rise or fall:\n- Explain the factors that could support an upward movement.\n- Explain the factors that could cause a downward movement.\n- Explain what signals or events should be watched.\n- Do not claim to know the exact future price or exact time of a movement.\n\nDo not invent information.\nUse only the supplied Final Analysis Agent output.\n\nReturn ONLY valid JSON using the structure defined in the System Message.",
+        "options": {
+          "systemMessage": "You are the Explainability Agent in an Explainable Multi-Agent Financial Decision Support System.\n\nYour primary responsibility is to provide a clear, question-focused and explainable answer using ONLY the information supplied by the Final Analysis Agent.\n\nYou must:\n- Answer the user's original question directly.\n- Explain how the supplied market, news, financial, and risk evidence supports the answer.\n- Trace important conclusions back to the available evidence.\n- Explain relationships between positive and negative factors.\n- Identify important uncertainty, missing information, or conflicting evidence.\n- Make the reasoning understandable to a non-expert.\n\nIf the user's question is about whether, when, or why a stock may rise or fall:\n- Explain the factors that could support upward movement.\n- Explain the factors that could cause downward movement.\n- Identify important signals, events, or conditions to watch.\n- Distinguish between current evidence and future uncertainty.\n- Do not claim to know the exact future price or exact timing of a rise or fall.\n\nIf the user asks whether they should invest:\n- Explain the evidence that may make the investment case stronger or weaker.\n- Discuss relevant positive and negative factors.\n- Do not give personalized financial advice.\n- Do not tell the user to BUY, SELL, or HOLD.\n\nYou do NOT:\n- Perform new financial analysis.\n- Search for new information.\n- Invent facts, prices, financial figures, news, events, or risks.\n- Override or contradict the Final Analysis Agent without evidence.\n- Create information that is missing from the supplied analysis.\n- Provide personalized financial advice.\n\nUse ONLY:\n1. The user's original question supplied in the User Message.\n2. The Final Analysis Agent output supplied in the User Message.\n\nReturn ONLY valid JSON using this structure:\n\n{\n  \"entity\": \"\",\n  \"ticker\": \"\",\n  \"direct_answer\": \"\",\n  \"key_factors\": [],\n  \"market_reasoning\": \"\",\n  \"news_reasoning\": \"\",\n  \"financial_reasoning\": \"\",\n  \"risk_reasoning\": \"\",\n  \"factor_interactions\": \"\",\n  \"uncertainties\": \"\",\n  \"explanation_summary\": \"\"\n}\n\nField requirements:\n\n\"direct_answer\":\nGive the clearest possible answer to the user's original question. This must directly address what the user asked rather than simply summarizing the company.\n\n\"key_factors\":\nList the most important evidence supporting the answer.\n\n\"market_reasoning\":\nExplain how the available market information affects the answer.\n\n\"news_reasoning\":\nExplain how the available news information affects the answer.\n\n\"financial_reasoning\":\nExplain how the available financial information affects the answer.\n\n\"risk_reasoning\":\nExplain how the available risk information affects the answer. If risk information is unavailable, explicitly state that it is unavailable.\n\n\"factor_interactions\":\nExplain how the positive and negative factors interact with each other.\n\n\"uncertainties\":\nClearly state what cannot be determined from the available information, including missing data and uncertainty about future outcomes.\n\n\"explanation_summary\":\nProvide a concise explanation of why the answer was reached.\n\nThe response must be evidence-based, transparent, and directly relevant to the user's question.\n\nDo not include markdown or explanations outside the JSON."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        2112,
+        416
+      ],
+      "id": "",
+      "name": "Explainability Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        2112,
+        624
+      ],
+      "id": "",
+      "name": "Google Gemini Chat Model5",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "",
+          "name": "Google Gemini(PaLM) Api account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "",
+              "name": "text",
+              "value": "={{ (() => {\n  const explain = JSON.parse($('Explainability Agent').first().json.output);\n\n  const financialReasoning =\n    explain.financial_reasoning ||\n    explain.financial_analysis ||\n    \"Financial analysis information was unavailable.\";\n\n  const riskReasoning =\n    explain.risk_reasoning ||\n    explain.risk_analysis ||\n    \"Risk analysis information was unavailable.\";\n\n  const keyFactors = Array.isArray(explain.key_factors)\n    ? explain.key_factors.map(f => `• ${f}`).join('\\n')\n    : (explain.key_factors || \"No key factors were provided.\");\n\n  return `FINANCIAL ANALYSIS\n\nCompany: ${explain.entity || \"\"}\nTicker: ${explain.ticker || \"\"}\n\nDIRECT ANSWER\n\n${explain.direct_answer || \"No direct answer was provided.\"}\n\nKEY FACTORS\n\n${keyFactors}\n\nMARKET REASONING\n\n${explain.market_reasoning || \"Market reasoning was unavailable.\"}\n\nNEWS REASONING\n\n${explain.news_reasoning || \"News reasoning was unavailable.\"}\n\nFINANCIAL REASONING\n\n${financialReasoning}\n\nRISK REASONING\n\n${riskReasoning}\n\nHOW THE FACTORS INTERACT\n\n${explain.factor_interactions || \"No factor interaction analysis was provided.\"}\n\nUNCERTAINTIES\n\n${explain.uncertainties || \"No uncertainties were provided.\"}\n\nEXPLANATION SUMMARY\n\n${explain.explanation_summary || \"No explanation summary was provided.\"}`;\n})() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        2352,
+        256
+      ],
+      "id": "",
+      "name": "final Edit Field"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Fetch stock market data from Alpha Vantage for the requested ticker. Retrieve the latest available daily market price and historical daily price data, including open, high, low, close, and volume. Use the ticker provided by the Market Agent. Return only data provided by Alpha Vantage and do not invent missing values.",
+        "url": "https://www.alphavantage.co/query",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "function",
+              "value": "TIME_SERIES_DAILY"
+            },
+            {
+              "name": "symbol",
+              "value": "={{ $fromAI('ticker', 'Stock ticker symbol for Alpha Vantage', 'string') }}"
+            },
+            {
+              "name": "outputsize",
+              "value": "compact"
+            },
+            {
+              "name": "apikey",
+              "value": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.5,
+      "position": [
+        1392,
+        576
+      ],
+      "id": "",
+      "name": "ALPHA"
+    },
+    {
+      "parameters": {
+        "jsCode": "function parseJSON(value) {\n  if (!value) return {};\n\n  if (typeof value === \"object\") {\n    return value;\n  }\n\n  if (typeof value !== \"string\") {\n    return {};\n  }\n\n  try {\n    return JSON.parse(value);\n  } catch {\n    return {};\n  }\n}\n\n\n// ======================================================\n// GET NODE OUTPUTS\n// ======================================================\n\nconst finalNode = $(\"final Edit Field\").first().json;\n\nconst merge = $(\"Merge\").first().json;\n\nconst market = parseJSON(\n  merge.market_output\n);\n\nconst news = parseJSON(\n  merge.news_output\n);\n\nconst finance = parseJSON(\n  merge.finance_output\n);\n\nconst risk = parseJSON(\n  merge.risk_output\n);\n\nconst explainability = parseJSON(\n  $(\"Explainability Agent\").first().json.output\n);\n\nconst finalAnalysisRaw = parseJSON(\n  $(\"Final Analysis Agent\").first().json.output\n);\n\n\n// ======================================================\n// FINANCE DATA\n// ======================================================\n\nconst financeData =\n  Object.keys(finance).length > 0\n    ? finance\n    : {\n        summary:\n          explainability.financial_analysis ||\n          explainability.financial_reasoning ||\n          \"\"\n      };\n\n\n// ======================================================\n// RISK DATA\n// ======================================================\n\nconst riskData =\n  Object.keys(risk).length > 0\n    ? risk\n    : {\n        agent: \"risk\",\n\n        entity:\n          explainability.entity || \"\",\n\n        ticker:\n          explainability.ticker || \"\",\n\n        overall_risk: \"\",\n\n        key_risks: [],\n\n        risk_summary:\n          explainability.risk_reasoning ||\n          explainability.risk_analysis ||\n          \"\"\n      };\n\n\n// ======================================================\n// NEWS DATA\n// ======================================================\n\nconst newsData =\n  Object.keys(news).length > 0\n    ? news\n    : {\n        entity:\n          explainability.entity || \"\",\n\n        ticker:\n          explainability.ticker || \"\",\n\n        news_summary:\n          explainability.news_reasoning ||\n          \"\"\n      };\n\n\n// ======================================================\n// MARKET DATA\n// ======================================================\n\nconst marketData = {\n  current_price:\n    market.current_price ?? null,\n\n  price_change:\n    market.price_change ?? null,\n\n  price_change_percent:\n    market.price_change_percent ?? null,\n\n  open:\n    market.open ?? null,\n\n  high:\n    market.high ?? null,\n\n  low:\n    market.low ?? null,\n\n  volume:\n    market.volume ?? null,\n\n  trend:\n    market.trend || \"\",\n\n  volatility:\n    market.volatility || \"\",\n\n  market_summary:\n    market.market_summary || \"\",\n\n  data_source:\n    market.data_source ||\n    \"Alpha Vantage\"\n};\n\n\n// ======================================================\n// HISTORICAL DATA\n// ======================================================\n\nconst historicalData =\n  Array.isArray(market.historical_data)\n    ? market.historical_data\n    : [];\n\n\n// ======================================================\n// FINAL ANALYSIS\n// ======================================================\n//\n// If Final Analysis Agent returned a real object,\n// keep it.\n//\n// If it returned {},\n// build the object from Explainability Agent.\n//\n\nlet finalAnalysis;\n\nif (\n  finalAnalysisRaw &&\n  Object.keys(finalAnalysisRaw).length > 0\n) {\n  finalAnalysis = finalAnalysisRaw;\n} else {\n  finalAnalysis = {\n    entity:\n      explainability.entity || \"\",\n\n    ticker:\n      explainability.ticker || \"\",\n\n    market_analysis:\n      explainability.market_reasoning ||\n      \"\",\n\n    news_analysis:\n      explainability.news_reasoning ||\n      \"\",\n\n    financial_analysis:\n      explainability.financial_analysis ||\n      explainability.financial_reasoning ||\n      \"\",\n\n    risk_analysis:\n      explainability.risk_reasoning ||\n      explainability.risk_analysis ||\n      \"\",\n\n    overall_assessment:\n      explainability.direct_answer ||\n      \"\",\n\n    data_quality_notes:\n      explainability.uncertainties ||\n      \"\"\n  };\n}\n\n\n// ======================================================\n// RETURN STRUCTURED DASHBOARD OBJECT\n// ======================================================\n\nreturn [\n  {\n    json: {\n\n      // Existing formatted report\n      report_text:\n        finalNode.text || \"\",\n\n\n      // Dashboard data\n      dashboard: {\n\n        // ----------------------------------------------\n        // COMPANY\n        // ----------------------------------------------\n\n        company:\n          explainability.entity ||\n          finalAnalysis.entity ||\n          market.entity ||\n          \"\",\n\n        ticker:\n          explainability.ticker ||\n          finalAnalysis.ticker ||\n          market.ticker ||\n          \"\",\n\n\n        // ----------------------------------------------\n        // MARKET\n        // ----------------------------------------------\n\n        market:\n          marketData,\n\n\n        // ----------------------------------------------\n        // HISTORICAL DATA\n        // ----------------------------------------------\n\n        historical_data:\n          historicalData,\n\n\n        // ----------------------------------------------\n        // NEWS\n        // ----------------------------------------------\n\n        news:\n          newsData,\n\n\n        // ----------------------------------------------\n        // FINANCE\n        // ----------------------------------------------\n\n        finance:\n          financeData,\n\n\n        // ----------------------------------------------\n        // RISK\n        // ----------------------------------------------\n\n        risk:\n          riskData,\n\n\n        // ----------------------------------------------\n        // FINAL ANALYSIS\n        // ----------------------------------------------\n\n        final_analysis:\n          finalAnalysis,\n\n\n        // ----------------------------------------------\n        // EXPLAINABILITY\n        // ----------------------------------------------\n\n        explainability:\n          explainability\n      }\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2416,
+        448
+      ],
+      "id": "",
+      "name": "Dashboard Data Builder"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Retrieve verified company fundamentals, financial ratios and key metrics that can support risk assessment. Use the verified ticker supplied by the Query Understanding Agent. This tool is used to identify financial leverage, liquidity, profitability and valuation-related risk factors. Never invent a ticker or financial value.",
+        "url": "https://www.alphavantage.co/query",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "OVERVIEW",
+              "value": "=symbol {{ $fromAI('ticker', 'Verified stock ticker symbol for risk analysis. Never invent a ticker.', 'string') }}"
+            },
+            {
+              "name": "apikey",
+              "value": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.5,
+      "position": [
+        1296,
+        240
+      ],
+      "id": "",
+      "name": "Risk Company Overview"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Search recent news related to the requested company for potential business, regulatory, legal, operational, supply-chain, competitive, management and financial risks. Use the company name and relevant risk terms supplied by the agent. Return only retrieved news information and do not invent events.",
+        "url": "=https://news.google.com/rss/search?q={{ $fromAI('query', 'Company name plus risk-related terms such as regulation, lawsuit, debt, competition, supply chain, management, earnings or operations', 'string') }}&hl=en-IN&gl=IN&ceid=IN:en",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.5,
+      "position": [
+        1424,
+        240
+      ],
+      "id": "",
+      "name": "Risk News Search"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Query Understanding Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Query Understanding Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Orchestrator Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Orchestrator Agent": {
+      "main": [
+        [
+          {
+            "node": "Market Agent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "News Agent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Risk Agent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Finance Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Understanding Agent": {
+      "main": [
+        [
+          {
+            "node": "Orchestrator Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Market Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "News Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "ai_tool": [
+        [
+          {
+            "node": "News Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP YAHOO": {
+      "ai_tool": [
+        [
+          {
+            "node": "Market Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "News Agent": {
+      "main": [
+        [
+          {
+            "node": "news Edit Fields node3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Risk Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Finance Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Risk Agent": {
+      "main": [
+        [
+          {
+            "node": "Risk Edit Fields node2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Finance Agent": {
+      "main": [
+        [
+          {
+            "node": "Finance Edit Fields node1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Market Agent": {
+      "main": [
+        [
+          {
+            "node": "Market Edit Fields node",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Final Analysis Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Final Analysis Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Market Edit Fields node": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "news Edit Fields node3": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Risk Edit Fields node2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Finance Edit Fields node1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Final Analysis Agent": {
+      "main": [
+        [
+          {
+            "node": "Explainability Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model5": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Explainability Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Explainability Agent": {
+      "main": [
+        [
+          {
+            "node": "final Edit Field",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "final Edit Field": {
+      "main": [
+        [
+          {
+            "node": "Dashboard Data Builder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ALPHA": {
+      "ai_tool": [
+        [
+          {
+            "node": "Market Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Risk Company Overview": {
+      "ai_tool": [
+        [
+          {
+            "node": "Risk Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Risk News Search": {
+      "ai_tool": [
+        [
+          {
+            "node": "Risk Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "07d4c04a-a917-4ee4-9843-6286e1095bbd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2847cfded1f04c9990d6c16d1e056a2e825529215ddffd96c3153f37beb5eb5e"
+  },
+  "nodeGroups": [],
+  "id": "tNhbhsI77HKGTjF4",
+  "tags": []
+}
